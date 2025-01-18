@@ -11,7 +11,7 @@ db = SQLAlchemy()
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 # Flask Condif
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://UAS_hallweight:1ce149cad7c154f0af552127805bf64c9acdf045@s4x97.h.filess.io:3306/UAS_hallweight"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://UAS_hallweight:1ce149cad7c154f0af552127805bf64c9acdf045@s4x97.h.filess.io:3306/UAS_hallweight"
 app.config['SECRET_KEY'] = 'belajardoangbang'
 
 db.init_app(app)
