@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+        <br>
+            <h1 class="my-4 fs-4 text">Weeboo Threads</h1>
+            <div class="my-4 p-3 bg-body rounded shadow-lg">
+            <h4 class="border-bottom pb-2 mb-0"><b>{{ thread.title }}</b></h4>
+                <small class="text-muted">
+                    Posted by {{ thread.author.username }} on {{ thread.created_at.strftime('%Y-%m-%d %H:%M') }}
+                </small>
+                <div class="d-flex text-body-secondary pt-3">
+                  <img src="{{ thread.author.profile_pic_url }}" class="flex-shrink-0 me-2 rounded" width="64" height="64" alt="Profile image">
+                  <p class="pb-3 mb-0  lh-sm ">
+                    {{ thread.content }}
+                  </p>
+                </div>
+            </div>
+
+
+
+            <h6 class="border-bottom pb-2 mb-0">Comments ({{comments|length}})</h6>
+            {% for comment in comments %}
+            <div class="d-flex text-body-secondary pt-3">
+              <img src="{{ comment.author.profile_pic_url }}" class="flex-shrink-0 me-2 rounded" width="64" height="64" alt="Profile image">
+              <div class="pb-3 mb-0 small lh-sm border-bottom w-100">
+                <div class="d-flex justify-content-between">
+                  <strong class="text-gray-dark">{{ comment.author.username }}</strong>
+                    <small class="text-muted">
+                        on {{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    </small>
+                </div>
+                <span class="d-block">{{ comment.content }}</span>
+              </div>
+            </div>
+            {% endfor %}
+
+
+            <form action="/thread/{{ thread.id }}" method="POST">
+                <div class="mb-3">
+                    <h1 class="fs-4 text my-4">Add Comment</h1>
+                    <input type="content" class="form-control" id="content" name="content">
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+{% endblock %}
