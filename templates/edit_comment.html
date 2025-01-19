@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2 class="mb-4">Edit Comment</h2>
+        <form method="POST">
+            <div class="mb-3">
+                <label for="content" class="form-label">Content</label>
+                <textarea class="form-control" id="content" name="content" rows="3" required>{{ comment.content }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Comment</button>
+            <a href="{{ url_for('thread', id=comment.thread_id) }}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

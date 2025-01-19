@@ -178,3 +178,118 @@ def thread(id):
     comments = Comment.query.filter_by(thread_id=id).all()
     return render_template("thread.html", thread=thread, comments=comments)
 
+@app.route('/edit_thread/<int:thread_id>', methods=['GET', 'POST'])
+def edit_thread(thread_id):
+    thread = Thread.query.get_or_404(thread_id)
+
+    if 'user_id' not in session or session['user_id'] != thread.user_id:
+        flash('You do not have permission to edit this thread')
+        return redirect(url_for('thread', id=thread_id))
+
+    if request.method == 'POST':
+        thread.title = request.form['title']
+        thread.content = request.form['content']
+        db.session.commit()
+        flash('Thread updated successfully!')
+        return redirect(url_for('thread', id=thread_id))
+
+    return render_template('edit_thread.html', thread=thread)
+
+@app.route('/delete_thread/<int:thread_id>', methods=['POST'])
+def delete_thread(thread_id):
+    thread = Thread.query.get_or_404(thread_id)
+
+    if 'user_id' not in session or session['user_id'] != thread.user_id:
+        flash('You do not have permission to delete this thread')
+        return redirect(url_for('thread', id=thread_id))
+
+    # Delete all comments first
+    Comment.query.filter_by(thread_id=thread_id).delete()
+    db.session.delete(thread)
+    db.session.commit()
+    flash('Thread deleted successfully!')
+    return redirect(url_for('index'))
+
+
+@app.route('/edit_comment/<int:comment_id>', methods=['GET', 'POST'])
+def edit_comment(comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+
+    if 'user_id' not in session or session['user_id'] != comment.user_id:
+        flash('You do not have permission to edit this comment')
+        return redirect(url_for('thread', id=comment.thread_id))
+
+    if request.method == 'POST':
+        comment.content = request.form['content']
+        db.session.commit()
+        flash('Comment updated successfully!')
+        return redirect(url_for('thread', id=comment.thread_id))
+
+    return render_template('edit_comment.html', comment=comment)
+
+
+@app.route('/delete_comment/<int:comment_id>', methods=['POST'])
+def delete_comment(comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+
+    if 'user_id' not in session or session['user_id'] != comment.user_id:
+        flash('You do not have permission to delete this comment')
+        return redirect(url_for('thread', id=comment.thread_id))
+
+    thread_id = comment.thread_id
+    db.session.delete(comment)
+    db.session.commit()
+    flash('Comment deleted successfully!')
+    return redirect(url_for('thread', id=thread_id))
+
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    user = User.query.get_or_404(session['user_id'])
+    if 'user_id' not in session or session['user_id'] != user.id:
+        flash('You do not have permission to access this profile')
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        username = request.form['username']
+        if User.query.filter_by(username=username).first():
+            flash('Username already exists')
+        else:
+            user.username = username
+            db.session.commit()
+            flash("Profile updated successfully!")
+
+    return render_template("profile.html", user=user)
+
+@app.route('/new_profile_pic', methods=['GET','POST'])
+def new_profile_pic():
+    user = User.query.get_or_404(session['user_id'])
+    if 'user_id' not in session or session['user_id'] != user.id:
+        flash('You do not have permission to edit this profile')
+        return redirect(url_for('index'))
+
+    user.profile_pic_url=random_picture()
+    db.session.commit()
+
+    flash("Profile Picture Updated")
+    return redirect(url_for('profile'))
+
+@app.route('/change_password', methods=['GET', 'POST'])
+def change_password():
+    user = User.query.get_or_404(session['user_id'])
+    if 'user_id' not in session or session['user_id'] != user.id:
+        flash('You do not have permission to change your password')
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        current_password = request.form['currentpassword']
+        new_password = request.form['newpassword']
+
+        if user and bcrypt.check_password_hash(user.password_hash, current_password):
+            user.password_hash = bcrypt.generate_password_hash(new_password)
+            db.session.commit()
+            flash("Your password has been changed")
+        else:
+            flash("Your current password is incorrect")
+        return redirect(url_for('profile'))
+
+    return render_template('change_password.html', user=user)
